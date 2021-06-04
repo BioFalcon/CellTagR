@@ -162,11 +162,11 @@ bam.process <- function(bam.file, pattern, short.nt.before.tag, short.nt.after.t
 #' 
 CellTagPatternCalling <- function(celltag.version) {
   celltag.df <- data.frame(version = c("v1", "v2", "v3"),
-                           nt.before.tag = c("GGT", "GTGATG", "TGTACG"),
+                           nt.after.tag = c("ACCGGT", "GTGATG", "TGTACG"),
                            stringsAsFactors = F)
   rownames(celltag.df) <- celltag.df$version
-  short.nt.before.tag <- celltag.df[celltag.version, "nt.before.tag"]
-  short.nt.after.tag <- "GAATTC"
+  short.nt..tag <- celltag.df[celltag.version, "nt.before.tag"]
+  short.nt.before.tag <- "GTTTATT"
   
   pattern <- paste0(short.nt.before.tag, "[ATCG]{8}", short.nt.after.tag)
   return(c(pattern, short.nt.before.tag, short.nt.after.tag))
