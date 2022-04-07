@@ -173,7 +173,7 @@ CellTagPatternCalling <- function(celltag.version) {
                            stringsAsFactors = F)
   rownames(celltag.df) <- celltag.df$version
   short.nt.after.tag <- celltag.df[celltag.version, "nt.after.tag"]
-  short.nt.before.tag <- "gcgggcccg"
+  short.nt.before.tag <- "GCGGGCCCG"
   
   pattern <- paste0(short.nt.before.tag, "[ATCG]{9}", short.nt.after.tag)
   return(c(pattern, short.nt.before.tag, short.nt.after.tag))
