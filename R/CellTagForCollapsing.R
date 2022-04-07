@@ -28,7 +28,7 @@ CellTagDataForCollapsing <- function(celltag.obj, output.file) {
     sample.list.prefix <- unique(unlist(lapply(strsplit(for.collapse$X2, "_"), function(x) x[1])))
     r <- apply(as.data.frame(sample.list.prefix), 1, 
                function(x) {
-                 for.collapse.sub <- for.collapse[which(startsWith(for.collapse$X2, x)), c("concat", "value")]
+                 for.collapse.sub <- for.collapse[which(startsWith(for.collapse$X2, paste0(x, "_"))), c("concat", "value")]
                  filename.to.save <- paste0(strsplit(output.file, "[.]")[[1]][1], "_", x, ".txt")
                  write.table(for.collapse.sub, filename.to.save, sep = "\t", row.names = F, quote = F, col.names = F)
                })
@@ -55,7 +55,7 @@ CellTagDataForCollapsing <- function(celltag.obj, output.file) {
 #' @examples
 #' CellTagDataPostCollapsing(bam.test.obj, "./collapsing_result.txt")
 #' 
-CellTagDataPostCollapsing <- function(celltag.obj, collapsed.rslt.file) {
+CellTagDataPostCollapsing <- function(celltag.obj, collapsed.rslt.file, replace.option = FALSE) {
   ultimate.collapsing.df <- data.frame()
   for (i in 1:length(collapsed.rslt.file)) {
     final.collapsing.df <- data.frame()
@@ -69,7 +69,7 @@ CellTagDataPostCollapsing <- function(celltag.obj, collapsed.rslt.file) {
       curr.sample.parts <- strsplit(basename(curr.file.dir), "_")[[1]]
       curr.sample <- strsplit(curr.sample.parts[length(curr.sample.parts)], "[.]")[[1]][1]
       collapsing <- celltag.obj@pre.starcode[[celltag.obj@curr.version]]
-      collapsing <- collapsing[which(startsWith(collapsing$X2, curr.sample)), ]
+      collapsing <- collapsing[which(startsWith(collapsing$X2, paste0(curr.sample, "_"))), ]
     } else {
       collapsing <- celltag.obj@pre.starcode[[celltag.obj@curr.version]]
     }
@@ -169,6 +169,6 @@ CellTagDataPostCollapsing <- function(celltag.obj, collapsed.rslt.file) {
   rownames(celltag.count.sparse) <- levels(df$Cell.Barcode)
   
   # Save the new matrix to the object
-  new.obj <- SetCellTagCurrentVersionWorkingMatrix(celltag.obj, "collapsed.count", as(celltag.count.sparse, "dgCMatrix"))
+  new.obj <- SetCellTagCurrentVersionWorkingMatrix(celltag.obj, "collapsed.count", as(celltag.count.sparse, "dgCMatrix"), replace = replace.option)
   return(new.obj)
 }

@@ -95,7 +95,11 @@ bam.process <- function(bam.file, pattern, short.nt.before.tag, short.nt.after.t
       if (tolower(technique) == "dropseq") {
           parameters <- ScanBamParam(what = scanBamWhat(), tag = c("XC", "GN", "XM", "GE"))
       } else {
-          stop("We don't support your current single-cell sequencing technology. Please contact us to add.")
+          if (tolower(technique) == "zumi") {
+              parameters <- ScanBamParam(what = scanBamWhat(), tag = c("BC", "GN", "UB", "CR"))
+          } else {
+              stop("We don't support your current single-cell sequencing technology. Please contact us to add.")
+          }
       }
   }
   bam.parsed.df <- data.table()
@@ -119,6 +123,9 @@ bam.process <- function(bam.file, pattern, short.nt.before.tag, short.nt.after.t
             if (tolower(technique) == "dropseq") {
                 curr.cell.bc <- curr.read$tag$XC
                 curr.umi <- curr.read$tag$XM
+            } else if (tolower(technique) == "zumi") {
+                curr.cell.bc <- curr.read$tag$BC
+                curr.umi <- curr.read$tag$UB
             }
           }
         curr.cell.tag <- rep(NA, length(curr.read$qname))
@@ -210,10 +217,15 @@ GetCellTagCurrentVersionWorkingMatrix <- function(celltag.obj, slot.to.select) {
   }
 }
 
-SetCellTagCurrentVersionWorkingMatrix <- function(celltag.obj, slot.to.set, final.to.set) {
+SetCellTagCurrentVersionWorkingMatrix <- function(celltag.obj, slot.to.set, final.to.set, replace = FALSE) {
   cop.final <- final.to.set
   colnames(cop.final) <- paste0(celltag.obj@curr.version, ".", colnames(cop.final))
   curr.version.existing.mtx <- GetCellTagCurrentVersionWorkingMatrix(celltag.obj, slot.to.set)
+  
+  if (replace) {
+    slot(celltag.obj, slot.to.set) <- cop.final
+    return(celltag.obj)
+  }
   
   if (sum(dim(slot(celltag.obj, slot.to.set))) <= 0) {
     slot(celltag.obj, slot.to.set) <- cop.final
@@ -242,7 +254,7 @@ SetCellTagCurrentVersionWorkingMatrix <- function(celltag.obj, slot.to.set, fina
     if (ncol(to.merge.mtx.cem) <= 0) {
       new.mtx <- to.merge.mtx.cop[,colnames(cop.final)]
     } else {
-      new.mtx <- cbind(to.merge.mtx.cop[,colnames(cop.final)], to.merge.mtx.cem[,colnames(cop.final)])
+      new.mtx <- cbind(to.merge.mtx.cop[new.rownames,], to.merge.mtx.cem[new.rownames, ])
     }
     
     slot(celltag.obj, slot.to.set) <- new.mtx
